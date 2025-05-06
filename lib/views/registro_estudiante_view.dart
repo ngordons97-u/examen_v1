@@ -22,7 +22,21 @@ class _RegistroEstudianteViewState extends State<RegistroEstudianteView> {
   final TextEditingController cuotaInicialController = TextEditingController();
   final TextEditingController cuotaMensualController = TextEditingController();
 
-  final double valorCurso = 1500;
+  final double valorCurso = 1500; //dato del costo del curso
+  void calcularCuotas() {
+    double cuotaInicial = double.tryParse(cuotaInicialController.text) ?? 0.0;
+
+    if (cuotaInicial >= valorCurso) {
+      cuotaMensualController.text = '0.00';
+      return;
+    }
+
+    double restante = valorCurso - cuotaInicial;
+    double cuotaBase = restante / 4;
+    double cuotaConRecargo = cuotaBase * 1.05;
+
+    cuotaMensualController.text = cuotaConRecargo.toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,15 +71,24 @@ class _RegistroEstudianteViewState extends State<RegistroEstudianteView> {
               ),
               _buildTextField(
                 cuotaMensualController,
-                'Cuota mensual',
+                'Cuota mensual (calculada)',
                 keyboardType: TextInputType.number,
+                enabled: false, // para que el usuario no la edite
               ),
+
               const SizedBox(height: 20),
               ElevatedButton(
+                //boton calcular
+                onPressed: calcularCuotas,
+                child: Text('Calcular Cuota Mensual'),
+              ),
+              ElevatedButton(
+                //boton registrar
                 onPressed: _registrar,
                 child: const Text('Registrar'),
               ),
               ElevatedButton(
+                //boton ver registros
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -86,7 +109,8 @@ class _RegistroEstudianteViewState extends State<RegistroEstudianteView> {
   Widget _buildTextField(
     TextEditingController controller,
     String label, {
-    TextInputType? keyboardType,
+    TextInputType keyboardType = TextInputType.text,
+    bool enabled = true,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
